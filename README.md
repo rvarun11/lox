@@ -1,4 +1,4 @@
-# Lox Language (jLox).
+# lox-lang
 
-[Crafting Interpreters](http://www.craftinginterpreters.com/)
+Implemented the Lox Language (jLox) [Crafting Interpreters](http://www.craftinginterpreters.com/)
 
