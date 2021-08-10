@@ -1,11 +1,11 @@
-package com.varun.lox;
+package vr.jlox.lox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.varun.lox.TokenType.*;
+import static vr.jlox.lox.TokenType.*;
 
 public class Scanner {
     private final String source;

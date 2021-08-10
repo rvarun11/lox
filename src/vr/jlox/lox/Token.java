@@ -1,4 +1,4 @@
-package com.varun.lox;
+package vr.jlox.lox;
 
 class Token {
     final TokenType type;

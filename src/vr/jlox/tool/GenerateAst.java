@@ -1,4 +1,4 @@
-package com.varun.tool;
+package vr.jlox.tool;
 
 import java.io.IOException;
 import java.io.PrintWriter;

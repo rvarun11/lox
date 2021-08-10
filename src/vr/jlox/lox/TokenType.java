@@ -1,4 +1,4 @@
-package com.varun.lox;
+package vr.jlox.lox;
 
 public enum TokenType {
     // Single-character tokens.

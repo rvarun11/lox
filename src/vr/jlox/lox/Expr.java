@@ -1,6 +1,4 @@
-package com.varun.lox;
-
-import java.util.List;
+package vr.jlox.lox;
 
 abstract class Expr {
   interface Visitor<R> {
