@@ -15,14 +15,21 @@ public class Lox {
     static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 1) {
-            System.out.println("Usage: jLox [script]");
-            System.exit(64);
-        } else if (args.length == 1) {
-            runFile(args[0]);
-        } else {
-            runPrompt();
-        }
+//        repl.it:
+//        runFile("ADD PATH");
+
+//        Local Testing:
+        runFile("C:\\Users\\KSR\\IdeaProjects\\lox\\play.lox");
+
+//        CLI : Comment the lines above & uncomment to play with CLI
+//        if (args.length > 1) {
+//            System.out.println("Usage: jLox [script]");
+//            System.exit(64);
+//        } else if (args.length == 1) {
+//            runFile(args[0]);
+//        } else {
+//            runPrompt();
+//        }
     }
 
     private static void runFile(String path) throws IOException {
@@ -47,6 +54,7 @@ public class Lox {
     }
 
     private static void run(String source) {
+        // 1. Scan the entire source and make tokens
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
@@ -54,12 +62,12 @@ public class Lox {
 //        for (Token token : tokens) {
 //            System.out.println(token);
 //        }
-
+        // 2. Parse the tokens to make them into statements.
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
 
         if (hadError) return;
-
+        // 3. Start our interpreter
         interpreter.interpret(statements);
 
     }

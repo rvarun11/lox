@@ -1,0 +1,7 @@
+// GitHub Repository: github.com/rvarun11/lox
+// Welcome!
+// Lox is a [add lox definition]
+// built by Varun Rajput with the help from the book Crafting Interpreters
+
+var a = 2 + 3;
+print a;
