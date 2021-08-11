@@ -24,7 +24,9 @@ equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
-unary          → ( "!" | "-" ) unary | primary ;
+unary          → ( "!" | "-" ) unary | call ;
+call           → primary ( "(" arguments? ")" )* ;
+arguments      → expression ( "," expression )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"  | IDENTIFIER ;
 
 -- Base Grammar for AST --
@@ -199,11 +201,8 @@ class Parser {
             Expr right = equality();
             expr = new Expr.Logical(expr, operator, right);
         }
-
         return expr;
     }
-
-
 
     // equality → comparison ( ( "!=" | "==" ) comparison )* ;
     private Expr equality() {
@@ -252,16 +251,34 @@ class Parser {
         return expr;
     }
 
-    // unary → ( "!" | "-" ) unary | primary ;
+//    unary → ( "!" | "-" ) unary | call ;
     private Expr unary() {
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
-        return primary();
+        return call();
     }
-    // primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
+    /*
+    call → primary ( "(" arguments? ")" )* ;
+
+    The code below doesn’t quite line up with the grammar rules.
+    Moved a few things around to make the code cleaner.
+     */
+    private Expr call() {
+        Expr expr = primary();
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    //    primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
     private Expr primary() {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
@@ -286,6 +303,24 @@ class Parser {
 
 
     // Helper Functions
+
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+
+        Token paren = consume(RIGHT_PAREN,
+                "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
+    }
+
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
             if (check(type)) {
