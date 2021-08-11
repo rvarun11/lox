@@ -8,17 +8,25 @@ import java.util.List;
 
 public class GenerateAst {
     public static void main(String[] args) throws IOException {
-        if (args.length != 1) {
-            System.err.println("Usage: gen-ast <output dir>");
-            System.exit(64);
-        }
-        String outputDir = args[0];
+//        if (args.length != 1) {
+//            System.err.println("Usage: gen-ast <output dir>");
+//            System.exit(64);
+//        }
+//        String outputDir = args[0];
+        String outputDir = "C:\\Users\\KSR\\IdeaProjects\\lox\\src\\vr\\jlox\\lox";
 
+        // this uses the base grammar
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
                 "Literal : Object value",
                 "Unary : Token operator, Expr right"
+        ));
+
+        // grammar for statements
+        defineAst(outputDir, "Stmt", Arrays.asList(
+                "Expression : Expr expression",
+                "Print      : Expr expression"
         ));
     }
 

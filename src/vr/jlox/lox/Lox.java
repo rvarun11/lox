@@ -11,7 +11,6 @@ import java.util.List;
 public class Lox {
 
     private static final Interpreter interpreter = new Interpreter();
-
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
 
@@ -57,11 +56,11 @@ public class Lox {
 //        }
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
+        List<Stmt> statements = parser.parse();
 
         if (hadError) return;
 
-        interpreter.interpret(expression);
+        interpreter.interpret(statements);
 
     }
 

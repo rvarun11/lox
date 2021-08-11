@@ -5,7 +5,12 @@ A parser has two jobs:
     1. For valid sequence of tokens, produce the Syntax Trees.
     2. For invalid sequence of tokens, produce appropriate Errors.
 
-Grammar Rules with Precedence
+program        → statement* EOF ;
+statement      → exprStmt | printStmt ;
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
+
+-- Grammar Rules with Precedence --
 expression     → equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -13,6 +18,14 @@ term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary | primary ;
 primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
+
+-- Base Grammar for AST --
+expression     → literal | unary | binary | grouping ;
+literal        → NUMBER | STRING | "true" | "false" | "nil" ;
+grouping       → "(" expression ")" ;
+unary          → ( "-" | "!" ) expression ;
+binary         → expression operator expression ;
+operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" ;
 
 ON REACHING:
 1. Terminal : we match the token and consume it.
@@ -23,7 +36,11 @@ ON REACHING:
 Like the scanner, the parser consumes a flat input sequence,
 only now we’re reading tokens instead of characters.
  */
+import java.util.ArrayList;
 import java.util.List;
+
+
+import static vr.jlox.lox.TokenType.*;
 
 class Parser {
     private static class ParseError extends RuntimeException {}
@@ -34,13 +51,15 @@ class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+
+        return statements;
     }
+
 
 
     // GRAMMAR RULES:
@@ -54,7 +73,7 @@ class Parser {
     private Expr equality() {
         Expr expr = comparison();
 
-        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
             Token operator = previous();
             Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
@@ -65,7 +84,7 @@ class Parser {
     private Expr comparison() {
         Expr expr = term();
 
-        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
+        while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
             Token operator = previous();
             Expr right = term();
             expr = new Expr.Binary(expr, operator, right);
@@ -76,7 +95,7 @@ class Parser {
     private Expr term() {
         Expr expr = factor();
 
-        while (match(TokenType.MINUS, TokenType.PLUS)) {
+        while (match(MINUS, PLUS)) {
             Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -88,7 +107,7 @@ class Parser {
     private Expr factor() {
         Expr expr = unary();
 
-        while (match(TokenType.SLASH, TokenType.STAR)) {
+        while (match(SLASH, STAR)) {
             Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);
@@ -98,7 +117,7 @@ class Parser {
 
     // unary → ( "!" | "-" ) unary | primary ;
     private Expr unary() {
-        if (match(TokenType.BANG, TokenType.MINUS)) {
+        if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
@@ -107,17 +126,17 @@ class Parser {
     }
     // primary → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
     private Expr primary() {
-        if (match(TokenType.FALSE)) return new Expr.Literal(false);
-        if (match(TokenType.TRUE)) return new Expr.Literal(true);
-        if (match(TokenType.NIL)) return new Expr.Literal(null);
+        if (match(FALSE)) return new Expr.Literal(false);
+        if (match(TRUE)) return new Expr.Literal(true);
+        if (match(NIL)) return new Expr.Literal(null);
 
-        if (match(TokenType.NUMBER, TokenType.STRING)) {
+        if (match(NUMBER, STRING)) {
             return new Expr.Literal(previous().literal);
         }
 
-        if (match(TokenType.LEFT_PAREN)) {
+        if (match(LEFT_PAREN)) {
             Expr expr = expression();
-            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+            consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
 
@@ -126,6 +145,24 @@ class Parser {
     }
 
     // Helper Functions
+
+    private Stmt statement() {
+        if (match(PRINT)) return printStatement();
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
 
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
@@ -149,7 +186,7 @@ class Parser {
     }
     // check if we've run out of tokens to parse
     private boolean isAtEnd() {
-        return peek().type == TokenType.EOF;
+        return peek().type == EOF;
     }
 
     private Token peek() {
@@ -176,7 +213,7 @@ class Parser {
         advance();
 
         while (!isAtEnd()) {
-            if (previous().type == TokenType.SEMICOLON) return;
+            if (previous().type == SEMICOLON) return;
 
             switch (peek().type) {
                 case CLASS:

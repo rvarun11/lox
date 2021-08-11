@@ -11,18 +11,50 @@ string -> String
 
  */
 
+/*
+Java doesn’t let you use lowercase “void” as a generic type argument for
+obscure reasons having to do with type erasure and the stack.
+Instead,  there is a separate “Void” type specifically for this use.
+Sort of a “boxed void”, like “Integer” is for “int”.
 
-public class Interpreter implements Expr.Visitor<Object> {
+ */
+
+import java.util.List;
+
+/* Java doesn't allow using void due to something called type erasure and stack,
+so we are using Void which is made for this purpose.
+just like Integer is for int, Void is for void
+ */
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     // API for the Interpreter Class
-    void interpret(Expr expression) {
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
         }
     }
+
+
+    // Visiting Expression Statements
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+
+        // we are returning null because java requires it to satisfy the Void type
+        return null;
+    }
+    // Visiting Print Statements
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
+    }
+
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -93,6 +125,10 @@ public class Interpreter implements Expr.Visitor<Object> {
 
         // Unreachable.
         return null;
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     private Object evaluate(Expr expr) {
