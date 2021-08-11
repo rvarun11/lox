@@ -8,14 +8,18 @@ A parser has two jobs:
 program        → declaration* EOF ;
 declaration    → varDecl | statement ;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-statement      → exprStmt | printStmt | block;
+statement      → exprStmt | ifStmt | printStmt | whileStmt | block;
 exprStmt       → expression ";" ;
+ifStmt         → "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt      → "print" expression ";" ;
-block           → "{" declaration "}" ;
+whileStmt      → "while" "(" expression ")" statement ;
+block          → "{" declaration "}" ;
 
 -- Grammar Rules with Precedence --
 expression     → assignment ;
-assignment     → IDENTIFIER "=" assignment | equality ;
+assignment     → IDENTIFIER "=" assignment | logic_or;
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )* ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
@@ -91,10 +95,13 @@ class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    // statement → exprStmt | printStmt | block;
+    // statement → exprStmt | ifStmt | printStmt | whileStmt | block ;
     private Stmt statement() {
         if (match(PRINT)) return printStatement();
+        if (match(IF)) return ifStatement();
+        if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
+
         return expressionStatement();
     }
     // exprStmt → expression ";" ;
@@ -104,12 +111,37 @@ class Parser {
         return new Stmt.Expression(expr);
     }
 
+//    ifStmt → "if" "(" expression ")" statement ( "else" statement )? ;
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
     // printStmt → "print" expression ";" ;
     private Stmt printStatement() {
         Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
     }
+
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after condition.");
+        Stmt body = statement();
+
+        return new Stmt.While(condition, body);
+    }
+
 
     // block → "{" declaration "}" ;
     private List<Stmt> block() {
@@ -130,7 +162,7 @@ class Parser {
 
     // assignment → IDENTIFIER "=" assignment | equality ;
     private Expr assignment() {
-        Expr expr = equality();
+        Expr expr = or();
 
         if (match(EQUAL)) {
             Token equals = previous();
@@ -144,6 +176,34 @@ class Parser {
         }
         return expr;
     }
+
+//    logic_or → logic_and ( "or" logic_and )* ;
+    private Expr or() {
+        Expr expr = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+//    logic_and → equality ( "and" equality )* ;
+    private Expr and() {
+        Expr expr = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+
 
     // equality → comparison ( ( "!=" | "==" ) comparison )* ;
     private Expr equality() {
@@ -223,6 +283,7 @@ class Parser {
 
         throw error(peek(), "Expect expression.");
     }
+
 
     // Helper Functions
     private boolean match(TokenType... types) {
