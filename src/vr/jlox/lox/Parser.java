@@ -5,19 +5,23 @@ A parser has two jobs:
     1. For valid sequence of tokens, produce the Syntax Trees.
     2. For invalid sequence of tokens, produce appropriate Errors.
 
-program        → statement* EOF ;
-statement      → exprStmt | printStmt ;
+program        → declaration* EOF ;
+declaration    → varDecl | statement ;
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+statement      → exprStmt | printStmt | block;
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+block           → "{" declaration "}" ;
 
 -- Grammar Rules with Precedence --
-expression     → equality ;
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment | equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary | primary ;
-primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
+primary        → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"  | IDENTIFIER ;
 
 -- Base Grammar for AST --
 expression     → literal | unary | binary | grouping ;
@@ -39,7 +43,6 @@ only now we’re reading tokens instead of characters.
 import java.util.ArrayList;
 import java.util.List;
 
-
 import static vr.jlox.lox.TokenType.*;
 
 class Parser {
@@ -51,22 +54,95 @@ class Parser {
         this.tokens = tokens;
     }
 
+    // GRAMMAR RULES:
+
+    // program → declaration* EOF ;
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
 
         return statements;
     }
 
+    // declaration → varDec | statement ;
+    private Stmt declaration() {
+        try {
+            if (match(VAR)) return varDeclaration();
 
+            return statement();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
 
-    // GRAMMAR RULES:
+    // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+    private Stmt varDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
 
-    // expression → equality ;
+        Expr initializer = null;
+        if (match(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
+    }
+
+    // statement → exprStmt | printStmt | block;
+    private Stmt statement() {
+        if (match(PRINT)) return printStatement();
+        if (match(LEFT_BRACE)) return new Stmt.Block(block());
+        return expressionStatement();
+    }
+    // exprStmt → expression ";" ;
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+
+    // printStmt → "print" expression ";" ;
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    // block → "{" declaration "}" ;
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+
+    // expression → assignment ;
     private Expr expression() {
-        return equality();
+        return assignment();
+    }
+
+    // assignment → IDENTIFIER "=" assignment | equality ;
+    private Expr assignment() {
+        Expr expr = equality();
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            if (expr instanceof Expr.Variable) {
+                Token name = ((Expr.Variable)expr).name;
+                return new Expr.Assign(name, value);
+            }
+            error(equals, "Invalid assignment target.");
+        }
+        return expr;
     }
 
     // equality → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -91,6 +167,7 @@ class Parser {
         }
         return expr;
     }
+
     // term → factor ( ( "-" | "+" ) factor )* ;
     private Expr term() {
         Expr expr = factor();
@@ -140,30 +217,14 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
-        // credits to github.com/caique
+        if (match(IDENTIFIER)) {
+            return new Expr.Variable(previous());
+        }
+
         throw error(peek(), "Expect expression.");
     }
 
     // Helper Functions
-
-    private Stmt statement() {
-        if (match(PRINT)) return printStatement();
-
-        return expressionStatement();
-    }
-
-    private Stmt printStatement() {
-        Expr value = expression();
-        consume(SEMICOLON, "Expect ';' after value.");
-        return new Stmt.Print(value);
-    }
-
-    private Stmt expressionStatement() {
-        Expr expr = expression();
-        consume(SEMICOLON, "Expect ';' after expression.");
-        return new Stmt.Expression(expr);
-    }
-
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
             if (check(type)) {
@@ -229,6 +290,4 @@ class Parser {
             advance();
         }
     }
-
-
 }

@@ -89,6 +89,4 @@ public class Lox {
         hadRuntimeError = true;
     }
 
-
-
 }

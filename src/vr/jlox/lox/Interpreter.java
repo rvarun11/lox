@@ -12,6 +12,7 @@ string -> String
  */
 
 /*
+
 Java doesn’t let you use lowercase “void” as a generic type argument for
 obscure reasons having to do with type erasure and the stack.
 Instead,  there is a separate “Void” type specifically for this use.
@@ -27,6 +28,8 @@ just like Integer is for int, Void is for void
  */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
+    private Environment environment = new Environment();
+
     // API for the Interpreter Class
     void interpret(List<Stmt> statements) {
         try {
@@ -38,16 +41,20 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
+    @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
 
     // Visiting Expression Statements
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
-
         // we are returning null because java requires it to satisfy the Void type
         return null;
     }
-    // Visiting Print Statements
+
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
@@ -55,6 +62,28 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+    }
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -117,14 +146,26 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
                 }
-                throw new RuntimeError(expr.operator,
-                        "Operands must be two numbers or two strings.");
+                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             case BANG_EQUAL: return !isEqual(left, right);
             case EQUAL_EQUAL: return isEqual(left, right);
         }
 
         // Unreachable.
         return null;
+    }
+
+    void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
     }
 
     private void execute(Stmt stmt) {
@@ -155,7 +196,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private String stringify(Object object) {
         if (object == null) return "nil";
 
-
         /*
         Lox uses double-precision numbers even for integer values.
         In that case, they should print without a decimal point.
@@ -175,9 +215,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return object.toString();
     }
 
-
-
-
     // RUNTIME ERROR DETECTION
 
     // checking for valid unary operand
@@ -192,9 +229,5 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         throw new RuntimeError(operator, "Operands must be numbers.");
     }
-
-
-
-
 
 }

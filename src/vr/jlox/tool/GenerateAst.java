@@ -17,16 +17,20 @@ public class GenerateAst {
 
         // this uses the base grammar
         defineAst(outputDir, "Expr", Arrays.asList(
+                "Assign   : Token name, Expr value",
                 "Binary : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
                 "Literal : Object value",
-                "Unary : Token operator, Expr right"
+                "Unary : Token operator, Expr right",
+                "Variable : Token name"
         ));
 
         // grammar for statements
         defineAst(outputDir, "Stmt", Arrays.asList(
+                "Block : List<Stmt> statements",
                 "Expression : Expr expression",
-                "Print      : Expr expression"
+                "Print : Expr expression",
+                "Var : Token name, Expr initializer"
         ));
     }
 
@@ -36,7 +40,7 @@ public class GenerateAst {
         String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
-        writer.println("package com.varun.lox;");
+        writer.println("package vr.jlox.lox;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();
