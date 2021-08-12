@@ -1,7 +1,7 @@
 # lox-lang
 
-Built the Lox Programming Language from the book [Crafting Interpreters](http://www.craftinginterpreters.com/).
-It is built using RD Parsing and AST Interpreter.
+Built the Lox Programming Language with RD Parsing & AST Interpreter from the book 
+[Crafting Interpreters](http://www.craftinginterpreters.com/).
 
 Lox is a dynamically typed high level language similar to JavaScript.
 
