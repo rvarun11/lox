@@ -1,15 +1,21 @@
-// GitHub Repository: github.com/rvarun11/lox
-// Welcome!
-// Lox is a [add lox definition]
-// built by Varun Rajput with the help from the book Crafting Interpreters
+// Lox Programming Language
+// built by Varun Rajput (github.com/rvarun11)
 
-var a = "global";
-{
-  fun showA() {
-    print a;
-  }
+// Use the Syntax in ReadMe file to get started
+// To Run : Hit Ctrl + Enter or click Run above
 
-  showA();
-  var a = "block";
-  showA();
+// Print to Console
+// print "Hello World!!";
+
+// Program to print first 10 Fibonacci Numbers
+fun fib(n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
 }
+
+var i = 1;
+while (i <= 10) {
+    print fib(i);
+    i = i + 1;
+}
+
