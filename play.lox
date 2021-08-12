@@ -3,9 +3,13 @@
 // Lox is a [add lox definition]
 // built by Varun Rajput with the help from the book Crafting Interpreters
 
-var a = 0;
-
-while (a < 10) {
+var a = "global";
+{
+  fun showA() {
     print a;
-    a = a + 1;
+  }
+
+  showA();
+  var a = "block";
+  showA();
 }

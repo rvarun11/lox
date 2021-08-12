@@ -1,35 +1,45 @@
 package vr.jlox.lox;
 
-/*
+import java.util.ArrayList;
+import java.util.List;
 
+/*
 Lox to Java Representations:
 Any Lox value -> Object
 nil	-> null
 Boolean ->	Boolean
 number -> Double
 string -> String
-
 */
 
 /*
-
-Java doesn’t let you use lowercase “void” as a generic type argument for
-obscure reasons having to do with type erasure and the stack.
-Instead,  there is a separate “Void” type specifically for this use.
-Sort of a “boxed void”, like “Integer” is for “int”.
-
- */
-
-import java.util.ArrayList;
-import java.util.List;
-
-/* Java doesn't allow using void due to something called type erasure and stack,
+Java doesn't allow using void due to something called type erasure and stack,
 so we are using Void which is made for this purpose.
 just like Integer is for int, Void is for void
  */
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
-    private Environment environment = new Environment();
+    final Environment globals = new Environment();
+
+    // for implementing native global functions
+    // globals field hold a fixed reference to outermost environment
+    private Environment environment = globals;
+
+    Interpreter() {
+        // defined a variable clock with anonymous class that implements LoxCallable
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double)System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() { return "<native fn>"; }
+        });
+    }
 
     // API for the Interpreter Class
     void interpret(List<Stmt> statements) {
@@ -57,6 +67,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        LoxFunction function = new LoxFunction(stmt, environment);
+        environment.define(stmt.name.lexeme, function);
+        return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch);
@@ -72,6 +89,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         System.out.println(stringify(value));
         return null;
     }
+
+    @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null) value = evaluate(stmt.value);
+
+        throw new Return(value);
+    }
+
 
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
@@ -199,10 +225,24 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         for (Expr argument : expr.arguments) {
             arguments.add(evaluate(argument));
         }
+        // to make our calls more robust.
+        // without this, calls like "hello_world"(); will be valid.
+        if (!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(expr.paren, "Can only call functions and classes.");
+        }
+
         LoxCallable function = (LoxCallable)callee;
+
+        // checking if the number of args match the required args beforehand
+        // throw a runtime error if the the number of arguments don't match
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(expr.paren, "Expected " +
+                    function.arity() + " arguments but got " +
+                    arguments.size() + ".");
+        }
+
         return function.call(this, arguments);
     }
-
 
     void executeBlock(List<Stmt> statements, Environment environment) {
         Environment previous = this.environment;
