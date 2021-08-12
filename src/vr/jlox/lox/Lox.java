@@ -15,21 +15,15 @@ public class Lox {
     static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
-//        repl.it:
-//        runFile("ADD PATH");
 
-//        Local Testing:
-        runFile("C:\\Users\\KSR\\IdeaProjects\\lox\\play.lox");
-
-//        CLI : Comment the lines above & uncomment to play with CLI
-//        if (args.length > 1) {
-//            System.out.println("Usage: jLox [script]");
-//            System.exit(64);
-//        } else if (args.length == 1) {
-//            runFile(args[0]);
-//        } else {
-//            runPrompt();
-//        }
+        if (args.length > 1) {
+            System.out.println("Usage: jLox [script]");
+            System.exit(64);
+        } else if (args.length == 1) {
+            runFile(args[0]);
+        } else {
+            runPrompt();
+        }
     }
 
     private static void runFile(String path) throws IOException {

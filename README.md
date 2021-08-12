@@ -1,12 +1,45 @@
 # lox-lang
 
-Implemented Tree-Walk Interpreter for the Lox Language from the book [Crafting Interpreters](http://www.craftinginterpreters.com/).
+Built the Lox Programming Language from the book [Crafting Interpreters](http://www.craftinginterpreters.com/).
+It is built using RD Parsing and AST Interpreter.
 
--- add lox def
+Lox is a dynamically typed high level language similar to JavaScript.
 
 ### *[Try it out]()*
 
 ## Syntax
+```
+// Print to Console
+print "Hello World!";
+
+// Variable Declaration
+var a = 2;
+
+// Logical Operators
+var c = !true;
+print c;
+
+// Conditional Statements
+if (100 > 10) {
+    print "100 is greater than 10";
+} else {
+    print "100 is not greater than 10";
+}
+
+// While Loops
+var d = 1;
+while (d <= 10) {
+    print d;
+    d = d + 1;
+}
+
+// Functions
+fun sayHi(name) {
+    print "Hi " + name;
+}
+print sayHi("Varun");
+
+```
 
 ## Grammar
 ```
@@ -51,7 +84,4 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "
 ```
 
 
-### Note: I haven't worked on the following features:
-1. for loops
-2. Semantic Analysis
-3. OOP
+***Note***: I haven't worked on For Loops, Semantic Analysis & OOP as of yet.
