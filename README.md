@@ -1,7 +1,6 @@
 # lox-lang
 
-Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter with the help from the book 
-[Crafting Interpreters](http://www.craftinginterpreters.com/).
+Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter.
 
 [Examples in Lox](https://replit.com/@rvarun11/lox?v=1)
 
@@ -113,5 +112,6 @@ binary         → expression operator expression ;
 operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "/" ;
 ```
 
+***Note***: I've added support for Modulo operator but haven't added For loop, Semantic Analysis and OOP.
 
-***Note***: I've added support for Modulo operator but haven't added For loop, semantic analysis and OOP.
+Reference: [Crafting Interpreters](http://www.craftinginterpreters.com/).
