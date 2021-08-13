@@ -3,7 +3,7 @@
 Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter from the book 
 [Crafting Interpreters](http://www.craftinginterpreters.com/).
 
-***[Fibonacci Series in Lox]()***
+***Example : [Fibonacci Series in Lox]()***
 
 ## Syntax
 ```js
@@ -54,20 +54,20 @@ while (i <= 10) {
 
 ## Get Started
 1. Ensure that you have JDK >= 1.8 installed.
-2. Run the following commands
+2. Run the following commands:
 ```shell
 $ https://github.com/rvarun11/lox.git
 $ cd lox
 ~/lox$ javac -d out src/vr/jlox/lox/*.java
 ```
-3. 
+3.
 a) To run Lox CLI: 
 ```shell
 ~/lox$ java -cp ./out vr.jlox.lox.Lox
 ```
  b) To run a Lox File: 
 ```shell
-~/lox$ java -cp ./out vr.jlox.lox.Lox <file-name>
+~/lox$ java -cp ./out vr.jlox.lox.Lox <file-name.>
 ```
 You can use existing play.lox file to get started!
 
