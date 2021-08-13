@@ -1,6 +1,6 @@
 # lox-lang
 
-Built a dynamically typed, high level interpreted language with syntax similar to JavaScript called Lox (from the book Crafting Interpreters).
+Built a dynamically typed, high level interpreted language with syntax similar to JavaScript called Lox (from the book [Crafting Interpreters](http://www.craftinginterpreters.com/)).
 
 
 [Examples in Lox](https://replit.com/@rvarun11/lox?v=1)
@@ -114,5 +114,3 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "
 ```
 
 ***Note***: I've added support for Modulo operator but haven't added For loop, Semantic Analysis and OOP.
-
-Reference: [Crafting Interpreters](http://www.craftinginterpreters.com/).
