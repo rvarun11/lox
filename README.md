@@ -1,11 +1,9 @@
 # lox-lang
 
-Built the Lox Programming Language with RD Parsing & AST Interpreter from the book 
+Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter from the book 
 [Crafting Interpreters](http://www.craftinginterpreters.com/).
 
-Lox is a dynamically typed high level language similar to JavaScript.
-
-### *[Try it out]()*
+***[Fibonacci Series in Lox]()***
 
 ## Syntax
 ```
@@ -38,6 +36,19 @@ fun sayHi(name) {
     print "Hi " + name;
 }
 print sayHi("Varun");
+
+// Fibonacci Series
+fun fib(n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+var i = 1;
+while (i <= 10) {
+    print fib(i);
+    i = i + 1;
+}
+
 
 ```
 
