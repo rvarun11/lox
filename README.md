@@ -1,9 +1,9 @@
 # lox-lang
 
-Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter from the book 
+Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter with the help from the book 
 [Crafting Interpreters](http://www.craftinginterpreters.com/).
 
-***Example : [Fibonacci Series in Lox]()***
+[Examples in Lox]()
 
 ## Syntax
 ```js
@@ -37,18 +37,17 @@ fun sayHi(name) {
 }
 print sayHi("Varun");
 
+// Examples
 // Fibonacci Series
 fun fib(n) {
     if (n <= 1) return n;
     return fib(n - 1) + fib(n - 2);
 }
-
 var i = 1;
 while (i <= 10) {
     print fib(i);
     i = i + 1;
 }
-
 
 ```
 
@@ -60,14 +59,15 @@ $ https://github.com/rvarun11/lox.git
 $ cd lox
 ~/lox$ javac -d out src/vr/jlox/lox/*.java
 ```
-3.
-a) To run Lox CLI: 
+3. Start Lox
+
+To run Lox CLI: 
 ```shell
 ~/lox$ java -cp ./out vr.jlox.lox.Lox
 ```
- b) To run a Lox File: 
+To run a Lox File: 
 ```shell
-~/lox$ java -cp ./out vr.jlox.lox.Lox <file-name.>
+~/lox$ java -cp ./out vr.jlox.lox.Lox <file-name>
 ```
 You can use existing play.lox file to get started!
 
@@ -98,7 +98,7 @@ logic_and      → equality ( "and" equality )* ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
-factor         → unary ( ( "/" | "*" ) unary )* ;
+factor         → unary ( ( "/" | "*" | "%" ) unary )* ;
 unary          → ( "!" | "-" ) unary | call ;
 call           → primary ( "(" arguments? ")" )* ;
 arguments      → expression ( "," expression )* ;
@@ -114,4 +114,4 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "
 ```
 
 
-***Note***: I haven't worked on For Loops, Semantic Analysis & OOP as of yet.
+***Note***: I haven't worked on For Loops, Semantic Analysis & OOP.

@@ -7,7 +7,8 @@
 // Print to Console
 // print "Hello World!!";
 
-// Program to print first 10 Fibonacci Numbers
+// Fibonacci Numbers
+print "--- Print first 10 Fibonacci Numbers using Recursion ---";
 fun fib(n) {
     if (n <= 1) return n;
     return fib(n - 1) + fib(n - 2);
