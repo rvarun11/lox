@@ -1,6 +1,7 @@
 # lox-lang
 
-Built a dynamically typed, high level language similar to JavaScript called Lox using RD Parser & AST Interpreter.
+Built a dynamically typed, high level interpreted language with syntax similar to JavaScript called Lox (from the book Crafting Interpreters).
+
 
 [Examples in Lox](https://replit.com/@rvarun11/lox?v=1)
 
