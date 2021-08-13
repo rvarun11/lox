@@ -114,4 +114,4 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">=" | "+"  | "-"  | "*" | "
 ```
 
 
-***Note***: I haven't worked on For Loops, Semantic Analysis & OOP.
+***Note***: I've added support for Modulo operator but haven't added For loop, semantic analysis and OOP.
