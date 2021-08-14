@@ -2,7 +2,7 @@
 
 Lox is a dynamically typed, high level interpreted language with syntax similar to JavaScript.
 
-All credits goes to Robert Nystrom for writing the amazing book [Crafting Interpreters](http://www.craftinginterpreters.com/).
+Credits to Robert Nystrom for writing the amazing book [Crafting Interpreters](http://www.craftinginterpreters.com/).
 
 [Examples in Lox](https://replit.com/@rvarun11/lox?v=1)
 
